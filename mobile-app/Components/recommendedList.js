@@ -24,10 +24,11 @@ export default function RecommendedList() {
   const navigation = useNavigation();
   const uid = useUidStore((state) => state.uid);
   const authToken = useAuthStore((state) => state.authToken);
-  const [data, setData] = useState([]);
+  const [data, setData] = useState([])
   const [recipeIdList, setRecipeIdList] = useState([]);
   const [finalData, setFinalData] = useState([]);
   const [loading, setLoading] = useState(true);
+  
 
   useEffect(() => {
     retrieve_data();

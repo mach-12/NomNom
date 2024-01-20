@@ -22,7 +22,7 @@ export default function SplashScreen() {
         backgroundColor: "#fbf0e1",
       }}
     >
-      <Image source={require("../Assets/app_logo3.png")} style={{width: width, resizeMode: 'contain',marginBottom : height*0.13}} />
+      <Image source={require("../Assets/logo2.png")} style={{width: width, resizeMode: 'contain',marginBottom : height*0.13}} />
     </View>
   );
 }
