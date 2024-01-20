@@ -1,4 +1,8 @@
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  Ionicons,
+  MaterialCommunityIcons,
+  AntDesign,
+} from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -18,6 +22,7 @@ import SplashScreen from "../Screens/splashScreen.js";
 import topDishScreen from "../Screens/topDishScreen.js";
 import Onboarding from "./onboarding.js";
 import RecipeInfo from "./recipeInfo.js";
+import OcrScreen from "../Screens/ocrScreen.js";
 // import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
@@ -26,7 +31,12 @@ const InsideStack = createNativeStackNavigator();
 
 export default function AppNavigation() {
   const [user, setUser] = useState(null);
+  const showLine = useRef(true);
+
+
   const TabNavigator = () => (
+    
+
     <>
       <Tab.Navigator
         screenOptions={{
@@ -64,6 +74,7 @@ export default function AppNavigation() {
           }}
           listeners={({ navigation, route }) => ({
             tabPress: (e) => {
+              showLine.current = true;
               Animated.spring(tabOffsetValue, {
                 toValue: 0,
                 useNativeDriver: true,
@@ -92,6 +103,7 @@ export default function AppNavigation() {
           }}
           listeners={({ navigation, route }) => ({
             tabPress: (e) => {
+              showLine.current = true;
               Animated.spring(tabOffsetValue, {
                 toValue: getWidth(),
                 useNativeDriver: true,
@@ -99,6 +111,40 @@ export default function AppNavigation() {
             },
           })}
         ></Tab.Screen>
+
+        <Tab.Screen
+          name="Ocr"
+          component={OcrScreen}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <View
+                style={{
+                  position: "absolute",
+                  // borderWidth: 1,
+                  // borderColor: focused ? '#fb9c32' : 'gray',
+                  padding: 10,
+                  borderRadius: 50,
+                  backgroundColor: "#fb9c32",
+                  bottom: 20,
+                  elevation: 3,
+                  zIndex: 20,
+                }}
+              >
+                <AntDesign name="scan1" size={40} color="white" />
+              </View>
+            ),
+          }}
+          listeners={({ navigation, route }) => ({
+            tabPress: (e) => {
+              showLine.current = false;
+              Animated.spring(tabOffsetValue, {
+                toValue: getWidth() * 2,
+                useNativeDriver: true,
+              }).start();
+            },
+          })}
+        ></Tab.Screen>
+
         <Tab.Screen
           name="Chatbot"
           component={ChatbotScreen}
@@ -127,8 +173,9 @@ export default function AppNavigation() {
           }}
           listeners={({ navigation, route }) => ({
             tabPress: (e) => {
+              showLine.current = true;
               Animated.spring(tabOffsetValue, {
-                toValue: getWidth() * 2,
+                toValue: getWidth() * 3,
                 useNativeDriver: true,
               }).start();
             },
@@ -154,8 +201,9 @@ export default function AppNavigation() {
           }}
           listeners={({ navigation, route }) => ({
             tabPress: (e) => {
+              showLine.current = true;
               Animated.spring(tabOffsetValue, {
-                toValue: getWidth() * 3,
+                toValue: getWidth() * 4,
                 useNativeDriver: true,
               }).start();
             },
@@ -163,18 +211,21 @@ export default function AppNavigation() {
         ></Tab.Screen>
       </Tab.Navigator>
 
-      <Animated.View
-        style={{
-          width: getWidth() - 20,
-          height: 2,
-          backgroundColor: "#fb9c32",
-          position: "absolute",
-          bottom: 88,
-          left: 49,
-          borderRadius: 20,
-          transform: [{ translateX: tabOffsetValue }],
-        }}
-      ></Animated.View>
+      {showLine.current && (
+        <Animated.View
+          style={{
+            width: getWidth() - 20,
+            height: 2,
+            backgroundColor: "#fb9c32",
+            position: "absolute",
+            bottom: 88,
+            left: 49,
+            borderRadius: 20,
+            zIndex: 10,
+            transform: [{ translateX: tabOffsetValue }],
+          }}
+        ></Animated.View>
+      )}
     </>
   );
 
@@ -306,5 +357,5 @@ function getWidth() {
 
   width = width - 80;
 
-  return width / 4;
+  return width / 5;
 }
