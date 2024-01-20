@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, TouchableOpacity,Dimensions } from "react-native";
+import { View, Text, TouchableOpacity, Dimensions } from "react-native";
 import { Camera } from "expo-camera";
 import { useFocusEffect } from "@react-navigation/native";
 import axios from "axios";
@@ -43,47 +43,60 @@ const Scanner = () => {
 
   return (
     <View style={{ flex: 1 }}>
-    <Camera style={{ flex: 1, zIndex: 2 }} type={type} ref={cameraRef}>
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "transparent",
-          flexDirection: "row",
-          justifyContent: "space-between",  // Align items at the ends of the container
-          paddingHorizontal: 15,  // Add padding for the flip button
-          paddingTop: 15,  // Add padding for the flip button
-        }}
-      >
-        <TouchableOpacity
+      <Camera style={{ flex: 1, zIndex: 2 }} type={type} ref={cameraRef}>
+        <View
           style={{
-            alignSelf: "flex-start",  // Align to the top left
-          }}
-          onPress={() => {
-            setType(
-              type === Camera.Constants.Type.back
-                ? Camera.Constants.Type.front
-                : Camera.Constants.Type.back
-            );
+            flex: 1,
+            backgroundColor: "transparent",
+            flexDirection: "row",
+            justifyContent: "space-between", // Align items at the ends of the container
+            paddingHorizontal: 15, // Add padding for the flip button
+            paddingTop: 15, // Add padding for the flip button
           }}
         >
-          <Text style={{ fontSize: 18, color: "white" }}>Flip</Text>
-        </TouchableOpacity>
-      </View>
-    </Camera>
+          {/* <TouchableOpacity
+            style={{
+              alignSelf: "flex-start", // Align to the top left
+            }}
+            onPress={() => {
+              setType(
+                type === Camera.Constants.Type.back
+                  ? Camera.Constants.Type.front
+                  : Camera.Constants.Type.back
+              );
+            }}
+          >
+            <Text style={{ fontSize: 18, color: "white" }}>Flip</Text>
+          </TouchableOpacity> */}
+        </View>
+      </Camera>
 
-    <TouchableOpacity
-      style={{
-        justifyContent: "center",  // Center content vertically
-        alignItems: "center",
-        backgroundColor: 'transparent',
-        position: 'absolute',
-        zIndex: 10,
-      }}
-      onPress={handleButtonClick}
-    >
-      <Text style={{ fontSize: 20, color: 'black', top: height*0.8, backgroundColor: 'white', padding: 13, borderRadius: 30, fontWeight: 'bold', left:width*0.34 }}>Scan Menu</Text>
-    </TouchableOpacity>
-  </View>
+      <TouchableOpacity
+        style={{
+          justifyContent: "center", // Center content vertically
+          alignItems: "center",
+          backgroundColor: "transparent",
+          position: "absolute",
+          zIndex: 10,
+        }}
+        onPress={handleButtonClick}
+      >
+        <Text
+          style={{
+            fontSize: 20,
+            color: "black",
+            top: height * 0.8,
+            backgroundColor: "white",
+            padding: 13,
+            borderRadius: 30,
+            fontWeight: "bold",
+            left: width * 0.34,
+          }}
+        >
+          Scan Menu
+        </Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
