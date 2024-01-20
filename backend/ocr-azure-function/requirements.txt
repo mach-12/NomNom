@@ -5,3 +5,4 @@
 azure-functions
 numpy
 opencv-python
+easyocr

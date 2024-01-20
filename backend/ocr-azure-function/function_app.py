@@ -1,16 +1,21 @@
+import base64
 import azure.functions as func
 import logging
 import cv2
-import numpy
+import numpy as np
 import json
+import easyocr
+import re
+
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+
 
 @app.route(route="menu_ocr_trigger", methods=["POST"])
 def menu_ocr_trigger(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
+    # reader = easyocr.Reader(['en'])
     img_base64 = req.params.get('img')
-    
     if not img_base64:
         try:
             req_body = req.get_json()
@@ -20,28 +25,32 @@ def menu_ocr_trigger(req: func.HttpRequest) -> func.HttpResponse:
             img_base64 = req_body.get('img')
 
     if img_base64:
-        img = img_base64 # decode_base64(img_base64)
-        model_result = run_model(img)
+        img = decode_base64(img_base64)
+        model_result = "hi"#run_model(reader, img)
         return func.HttpResponse(json.dumps(model_result), mimetype="application/json")
-
     else:
         return func.HttpResponse(
              "This HTTP triggered function executed successfully. Pass a img_base64 in the query string or in the request body for a personalized response.",
              status_code=200
         )
-
-def run_model(image_data):
     
+    
+
+def run_model(reader, image_data):
+    ocr_result = reader.readtext(image_data)
+
+    ocr_text = [i[1] for i in ocr_result[0]]
+
+    numeric_pattern = re.compile(r'^\d+$')
+
+    ocr_text_filtered = [item for item in ocr_text if not numeric_pattern.match(item)]
+
+
     menu_data = [
-        {"menu_item": "Pancakes", "menu_section": "Breakfast"},
-        {"menu_item": "Eggs Benedict", "menu_section": "Breakfast"},
-        {"menu_item": "Coffee", "menu_section": "Beverages"},
-        {"menu_item": "Club Sandwich", "menu_section": "Lunch"},
-        {"menu_item": "Caesar Salad", "menu_section": "Lunch"},
-        {"menu_item": "Iced Tea", "menu_section": "Beverages"},
-        {"menu_item": "Grilled Salmon", "menu_section": "Dinner"},
-        {"menu_item": "Spaghetti Bolognese", "menu_section": "Dinner"},
-        {"menu_item": "Mango Smoothie", "menu_section": "Beverages"},
+        {
+            "menu_item":[i for i in ocr_text_filtered],
+            "menu_section": ["" for i in ocr_text_filtered]
+        }
     ]
 
     return menu_data
