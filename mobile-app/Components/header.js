@@ -50,7 +50,7 @@ export default function Header() {
         <Text style={{color: "#525252"}}>UI designer & Cook</Text>
       </View>
       <Image
-        source={require("../Assets/disha_pfp.jpg")}
+        source={require("../Assets/person3.png")}
         style={{ width: width * 0.106, height: height * 0.051, borderRadius: 50 }}
       />
     </SafeAreaView>

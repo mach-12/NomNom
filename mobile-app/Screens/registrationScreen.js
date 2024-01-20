@@ -66,11 +66,17 @@ export default function RegistrationScreen() {
 
   function setUpProfile(user_id) {
     // console.log(user_id);
-    setDoc(doc(FIREBASE_DB, "users", user_id), {
-      name: name,
-      phone: phone,
-      email: email,
-    });
+
+    try {
+      setDoc(doc(FIREBASE_DB, "users", user_id), {
+        name: name,
+        phone: phone,
+        email: email,
+      });
+    } catch (err) {
+      console.log(err);
+      alert(err);
+    }
   }
 
   return (

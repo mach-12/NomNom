@@ -91,7 +91,7 @@ export default function AccountScreen() {
           <View style={{ alignItems: "center", marginTop: 50 }}>
             <Image
               // entering={FadeIn.duration(400).delay(450)}
-              source={require('../Assets/disha_pfp.jpg')}
+              source={require('../Assets/person3.png')}
               style={{ height: 150, width: 150, borderRadius: 150 }}
             />
             <Text
