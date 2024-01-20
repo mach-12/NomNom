@@ -33,10 +33,7 @@ export default function AppNavigation() {
   const [user, setUser] = useState(null);
   const showLine = useRef(true);
 
-
   const TabNavigator = () => (
-    
-
     <>
       <Tab.Navigator
         screenOptions={{
@@ -157,13 +154,13 @@ export default function AppNavigation() {
               >
                 {focused ? (
                   <MaterialCommunityIcons
-                    name="account-group"
+                    name="robot-excited"
                     size={20}
                     color="#fb9c32"
                   />
                 ) : (
                   <MaterialCommunityIcons
-                    name="account-group-outline"
+                    name="robot-excited-outline"
                     size={20}
                     color="gray"
                   />
