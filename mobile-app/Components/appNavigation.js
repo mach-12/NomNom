@@ -23,6 +23,7 @@ import topDishScreen from "../Screens/topDishScreen.js";
 import Onboarding from "./onboarding.js";
 import RecipeInfo from "./recipeInfo.js";
 import OcrScreen from "../Screens/ocrScreen.js";
+import Scanner from "./Scanner.js";
 // import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
@@ -273,6 +274,15 @@ export default function AppNavigation() {
         <InsideStack.Screen
           name="InventorySearchScreen"
           component={InventoryScreen}
+          options={{
+            title: "Inventory Search Screen",
+            headerShown: false,
+            animation: "slide_from_right",
+          }}
+        />
+        <InsideStack.Screen
+          name="ScannerScreen"
+          component={Scanner}
           options={{
             title: "Inventory Search Screen",
             headerShown: false,
