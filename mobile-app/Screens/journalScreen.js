@@ -40,7 +40,7 @@ export default function FoodJournal() {
   useEffect(() => {
     // This function will be called once when the component mounts
     getJournalData();
-  }, []); 
+  }, [removeFromJournal]);
 
   const getJournalData = async () => {
     setLoading(false);
@@ -59,6 +59,7 @@ export default function FoodJournal() {
       console.error("Error retrieving data:", error);
     }
 
+    setRecipeData([]);
     fetchAllData();
   };
 
@@ -89,52 +90,19 @@ export default function FoodJournal() {
     }
   };
 
-  const RenderItem = (item) => {
-    return (
-      <TouchableOpacity
-        onPress={() => navigation.navigate("RecipeInfo", { recipeData: item })}
-      >
-        <View
-          style={{
-            marginLeft: 10,
-            height: height * 0.08,
-            width: width * 0.9,
-            padding: 10,
-            borderRadius: 15,
-            marginBottom: 20,
-          }}
-        >
-          <View style={{ flexDirection: "row" }}>
-            <Image
-              source={{ uri: item?.url }}
-              style={{
-                height: height * 0.08,
-                width: height * 0.07,
-                borderRadius: 20,
-              }}
-            />
-            <View style={{ marginLeft: 10, marginTop: 5, width: width * 0.5 }}>
-              <Text style={{ fontSize: 13, fontWeight: "800", color: "black" }}>
-                {item?.recipe_title}
-              </Text>
+  const removeFromJournal = async (item) => {
+    try {
+      const docRef = doc(FIREBASE_DB, "users", uid);
 
-              <View style={{ marginTop: 25, flexDirection: "row" }}>
-                <View style={{ flexDirection: "row" }}>
-                  <MaterialCommunityIcons
-                    name="food-outline"
-                    size={15}
-                    color="grey"
-                  />
-                  <Text style={{ color: "grey", fontSize: 13, marginLeft: 5 }}>
-                    {item?.total_time} Minutes
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
+
+      updateDoc(docRef, {
+        journal: arrayRemove(item.recipe_id),
+      });
+
+      console.log("removed");
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
@@ -188,7 +156,47 @@ export default function FoodJournal() {
             showsVerticalScrollIndicator={false}
             data={recipeData}
             renderItem={({ item }) => (
-              <Text>{item.url}</Text>
+              <View
+                style={{
+                  backgroundColor: "white",
+                  height: height * 0.08,
+                  width: width * 0.8,
+                  marginBottom: 20,
+                  borderRadius: 20,
+                  flexDirection: "row",
+                  elevation: 1,
+                }}
+              >
+                <Image
+                  source={{ uri: item?.url }}
+                  style={{ resizeMode: "cover", width: 60 }}
+                />
+                <View
+                  style={{
+                    backgroundColor: "white",
+                    justifyContent: "space-between",
+                    paddingVertical: 10,
+                    width: width*0.40
+                  }}
+                >
+                  <Text>{item.recipe_title}</Text>
+                  <Text>{item.total_time} Minutes</Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => removeFromJournal(item)}
+                  style={{
+                    alignSelf: "center",
+                    backgroundColor: "#fb9c32",
+                    borderRadius: 20,
+                    marginLeft: 10,
+                    padding: 5,
+                    paddingHorizontal: 15,
+                    // width: width*0.15
+                  }}
+                >
+                  <Text style={{ color: "white", fontWeight: "500" }}>Remove</Text>
+                </TouchableOpacity>
+              </View>
             )}
           />
         )}
