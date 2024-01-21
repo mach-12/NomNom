@@ -15,7 +15,7 @@ export default function ChatBotScreen() {
     const userMessage = newMessages[0].text;
 
     try {
-      const response = await fetch("https://347a-2401-4900-5d9b-5a49-74a7-9b3e-16b8-bfb.ngrok-free.app/chat", {
+      const response = await fetch("https://4bc6-115-241-34-98.ngrok-free.app/chat", {
         method: "POST",
         headers: {
           Accept: "application/json",
