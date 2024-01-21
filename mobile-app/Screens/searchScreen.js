@@ -14,6 +14,15 @@ import axios from "axios";
 import useAuthStore from "../Components/authStore.js";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import {
+  doc,
+  updateDoc,
+  arrayUnion,
+  getDoc,
+  arrayRemove,
+} from "firebase/firestore";
+import { FIREBASE_DB } from "../FirebaseConfig.js";
+import useUidStore from "../Components/uidStore.js";
 
 const { width, height } = Dimensions.get("screen");
 
@@ -48,6 +57,8 @@ const SearchScreen = () => {
   const [loading, setLoading] = useState(false);
   const authToken = useAuthStore((state) => state.authToken);
   const navigation = useNavigation();
+  const uid = useUidStore((state) => state.uid);
+  const [exists, setExists] = useState(false);
 
   const searchQuery = () => {
     const capitalQuery = capitalizeFirstLetterOfEachWord(query);
@@ -110,7 +121,7 @@ const SearchScreen = () => {
                 borderRadius: 20,
               }}
             />
-            <View style={{ marginLeft: 10, marginTop: 5 }}>
+            <View style={{ marginLeft: 10, marginTop: 5, width: width * 0.5 }}>
               <Text style={{ fontSize: 13, fontWeight: "800", color: "black" }}>
                 {item?.recipe_title}
               </Text>
@@ -128,10 +139,75 @@ const SearchScreen = () => {
                 </View>
               </View>
             </View>
+            <TouchableOpacity
+              onPress={() => checkJournal(item)}
+              style={{
+                alignSelf: "center",
+                backgroundColor: "#fb9c32",
+                borderRadius: 20,
+                marginLeft: 10,
+                padding: 5,
+                paddingHorizontal: 15
+                // width: width*0.15
+              }}
+            >
+              <Text style={{ color: "white", fontWeight: "500" }}>
+                Add
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </TouchableOpacity>
     );
+  };
+
+  const checkJournal = async (item) => {
+    console.log(item.recipe_id);
+
+    const docRef = doc(FIREBASE_DB, "users", uid);
+
+    try {
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        user_data = docSnap.data();
+        setExists(user_data.journal.includes(item.recipe_id));
+      } else {
+        console.log("No such document");
+      }
+    } catch (error) {
+      console.error("Error retrieving data:", error);
+    }
+
+    if (!exists) {
+      setExists(true);
+      addToJournal(item);
+      setRecipes([]);
+    } else {
+      setExists(false);
+      // removeFromJournal(item);
+    }
+  };
+
+  const addToJournal = async (item) => {
+    updateDoc(doc(FIREBASE_DB, "users", uid), {
+      journal: arrayUnion(item.recipe_id),
+    });
+    console.log("added");
+  };
+
+  const removeFromJournal = async (item) => {
+    try {
+      const docRef = doc(FIREBASE_DB, "users", uid);
+
+      updateDoc(docRef, {
+        journal: arrayRemove(item.recipe_id),
+      });
+
+      console.log("removed");
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (

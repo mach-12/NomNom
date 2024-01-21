@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, TouchableOpacity, Dimensions } from "react-native";
+import { View, Text, TouchableOpacity, Dimensions,ActivityIndicator } from "react-native";
 import { Camera } from "expo-camera";
 import { useFocusEffect } from "@react-navigation/native";
 import axios from "axios";
@@ -9,6 +9,7 @@ const Scanner = () => {
   const [type, setType] = useState(Camera.Constants.Type.back);
   const cameraRef = useRef(null);
   const { width, height } = Dimensions.get("screen");
+  const [imageUri, setImageUri]=useState('')
 
   const setupCamera = async () => {
     const { status } = await Camera.requestPermissionsAsync();
@@ -31,6 +32,8 @@ const Scanner = () => {
       const photo = await cameraRef.current.takePictureAsync();
       // Handle the captured photo as needed
       console.log(photo);
+
+      setImageUri(photo.uri)
     }
   };
 
