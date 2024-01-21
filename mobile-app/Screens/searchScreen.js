@@ -14,6 +14,15 @@ import axios from "axios";
 import useAuthStore from "../Components/authStore.js";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import {
+  doc,
+  updateDoc,
+  arrayUnion,
+  getDoc,
+  arrayRemove,
+} from "firebase/firestore";
+import { FIREBASE_DB } from "../FirebaseConfig.js";
+import useUidStore from "../Components/uidStore.js";
 
 const { width, height } = Dimensions.get("screen");
 
@@ -23,14 +32,6 @@ const capitalizeFirstLetterOfEachWord = (str) => {
 
 const replaceSpacesWithComma = (str) => {
   return str.replace(/\s+/g, ",");
-};
-
-const fetchDRI = async () => {
-  return {
-    fat_grams: 70,
-    protein_grams: 50,
-    carb_grams: 130,
-  };
 };
 
 const fetchData = async (url, authToken, setRecipes, setLoading) => {
@@ -57,6 +58,32 @@ const SearchScreen = () => {
   const [driResults, setDRIResults] = useState({});
   const authToken = useAuthStore((state) => state.authToken);
   const navigation = useNavigation();
+  const uid = useUidStore((state) => state.uid);
+
+  const fetchDRI = async () => {
+    const docRef = doc(FIREBASE_DB, "users", uid);
+
+    try {
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const user_data = docSnap.data();
+        console.log(user_data.carb_grams);
+        console.log(user_data.fat_grams);
+        console.log(user_data.protein_grams);
+      } else {
+        console.log("No such document");
+      }
+    } catch (error) {
+      console.error("Error retrieving data:", error);
+    }
+
+    return {
+      fat_grams: user_data.fat_grams,
+      protein_grams: user_data.protein_grams,
+      carb_grams: user_data.carb_grams,
+    };
+  };
 
   useEffect(() => {
     // Fetch DRI results when the component mounts
@@ -121,7 +148,7 @@ const SearchScreen = () => {
         <View
           style={{
             marginLeft: 10,
-            height: height * 0.08,
+            height: height * 0.1,
             width: width * 0.9,
             padding: 10,
             borderRadius: 15,
@@ -129,7 +156,7 @@ const SearchScreen = () => {
             backgroundColor: isHealthy ? "#aaffaa" : "#ffaaaa",
           }}
         >
-          <View style={{ flexDirection: "row" }}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Image
               source={{ uri: item.img_url }}
               style={{
@@ -139,7 +166,14 @@ const SearchScreen = () => {
               }}
             />
             <View style={{ marginLeft: 10, marginTop: 5 }}>
-              <Text style={{ fontSize: 13, fontWeight: "800", color: "black" }}>
+              <Text
+                style={{
+                  fontSize: 13,
+                  fontWeight: "800",
+                  color: "black",
+                  width: width * 0.4,
+                }}
+              >
                 {item?.recipe_title}
               </Text>
 
@@ -156,12 +190,18 @@ const SearchScreen = () => {
                 </View>
               </View>
             </View>
+            <View style={{alignItems: 'center'}}>
+              <Text style={{ color: healthTextColor, fontWeight: "bold" }}>
+                {isHealthy ? "Healthy" : "Unhealthy"}
+              </Text>
+              <View>
+
+              </View>
+              <Text style={{backgroundColor: '#fb9c32', padding: 7, borderRadius: 20, color: 'white', fontWeight: '500'}}>Add to Journal</Text>
+            </View>
           </View>
 
           {/* Display health status */}
-          <Text style={{ color: healthTextColor, fontWeight: "bold" }}>
-            {isHealthy ? "Healthy" : "Unhealthy"}
-          </Text>
         </View>
       </TouchableOpacity>
     );

@@ -19,8 +19,7 @@ const Scanner = () => {
     React.useCallback(() => {
       setupCamera();
 
-      return () => {
-      };
+      return () => {};
     }, [])
   );
 
@@ -28,17 +27,41 @@ const Scanner = () => {
     if (cameraRef.current) {
       const photo = await cameraRef.current.takePictureAsync();
       console.log(photo);
+      console.log(photo.uri);
 
-      const base64Image = `data:image/jpg;base64,${photo.base64}`;
+      const imgURL = photo.uri;
+
+      fetch(imgURL)
+        .then((response) => response.blob())
+        .then((blob) => {
+          // Convert the blob to base64
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+        })
+        .then((base64String) => {
+          // Now you have the image in base64 format
+          console.log("Base64 image:", base64String);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+
+      const base64Image = `${base64String}`;
+
+      // console.log(base64Image);
+      // console.log(photo.uri);
 
       try {
         const response = await axios.post(
-          "yahalinkdaalchutiye/menu_ocr_trigger",
+          "https://3e14-182-79-102-194.ngrok-free.app/api/menu_ocr_trigger",
           {
             img: base64Image,
           }
         );
-
         console.log(response.data);
       } catch (error) {
         console.error("Error sending image to API:", error);
