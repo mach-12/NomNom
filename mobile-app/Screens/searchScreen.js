@@ -20,6 +20,7 @@ import {
   arrayUnion,
   getDoc,
   arrayRemove,
+  setDoc,
 } from "firebase/firestore";
 import { FIREBASE_DB } from "../FirebaseConfig.js";
 import useUidStore from "../Components/uidStore.js";
@@ -153,7 +154,8 @@ const SearchScreen = () => {
             padding: 10,
             borderRadius: 15,
             marginBottom: 20,
-            backgroundColor: isHealthy ? "#aaffaa" : "#ffaaaa",
+            // backgroundColor: isHealthy ? "#aaffaa" : "#ffaaaa",
+            backgroundColor: "#f6f6f6",
           }}
         >
           <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -184,20 +186,32 @@ const SearchScreen = () => {
                     size={15}
                     color="grey"
                   />
-                  <Text style={{ color: "grey", fontSize: 13, marginLeft: 5 }}>
-                    {item.total_time} Minutes
+                  <Text
+                    style={{
+                      color: healthTextColor,
+                      fontWeight: "bold",
+                      marginLeft: 5,
+                    }}
+                  >
+                    {isHealthy ? "Healthy" : "Unhealthy"}
                   </Text>
                 </View>
               </View>
             </View>
-            <View style={{alignItems: 'center'}}>
-              <Text style={{ color: healthTextColor, fontWeight: "bold" }}>
-                {isHealthy ? "Healthy" : "Unhealthy"}
-              </Text>
-              <View>
-
-              </View>
-              <Text style={{backgroundColor: '#fb9c32', padding: 7, borderRadius: 20, color: 'white', fontWeight: '500'}}>Add to Journal</Text>
+            <View style={{ alignItems: "center" }}>
+              <TouchableOpacity onPress={()=>addtoJournal(item)}>
+                <Text
+                  style={{
+                    backgroundColor: "#fb9c32",
+                    padding: 7,
+                    borderRadius: 20,
+                    color: "white",
+                    fontWeight: "500",
+                  }}
+                >
+                  Add to Journal
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -206,6 +220,19 @@ const SearchScreen = () => {
       </TouchableOpacity>
     );
   };
+
+  const addtoJournal=async(item)=>{
+    try {
+      // Add DRI data to the user profile
+      updateDoc(doc(FIREBASE_DB, "users", uid), {
+        journal: arrayUnion(item.recipe_id),
+      });
+      console.log("added");
+    } catch (err) {
+      console.log(err);
+      alert(err);
+    }
+  }
 
   return (
     <View style={{ flex: 1 }}>
