@@ -28,22 +28,34 @@ import { Feather } from "@expo/vector-icons";
 
 const { height, width } = Dimensions.get("screen");
 
-export default function FoodJournal() {
+const FoodJournal = () => {
   const uid = useUidStore((state) => state.uid);
   const authToken = useAuthStore((state) => state.authToken);
   const [recipeID, setRecipeID] = useState([]);
   const [recipeData, setRecipeData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [proteinGrams, setProteinGrams] = useState(0);
+  const [calories, setCalories] = useState(0);
+  const [carbGrams, setCarbGrams] = useState(0);
+  const [totalProtein, setTotalProtein] = useState(0);
+  const [totalCarbs, setTotalCarbs] = useState(0);
+  const [totalCalories, setTotalCalories] = useState(0);
 
   const navigation = useNavigation();
 
   useEffect(() => {
-    // This function will be called once when the component mounts
+    setProteinGrams(0);
+    setCarbGrams(0);
+    setCalories(0);
+    setTotalCalories(0);
+    setTotalCarbs(0);
+    setTotalProtein(0);
     getJournalData();
   }, [removeFromJournal]);
 
   const getJournalData = async () => {
-    setLoading(false);
+    setRecipeData([]);
+    setLoading(true);
     const docRef = doc(FIREBASE_DB, "users", uid);
 
     try {
@@ -52,6 +64,10 @@ export default function FoodJournal() {
       if (docSnap.exists()) {
         const user_data = docSnap.data();
         setRecipeID(user_data.journal);
+
+        setCarbGrams(user_data.carb_grams);
+        setCalories(user_data.total_calories);
+        setProteinGrams(user_data.protein_grams);
       } else {
         console.log("No such document");
       }
@@ -59,7 +75,6 @@ export default function FoodJournal() {
       console.error("Error retrieving data:", error);
     }
 
-    setRecipeData([]);
     fetchAllData();
   };
 
@@ -74,11 +89,16 @@ export default function FoodJournal() {
       const response = await axios.get(api_url, { headers });
       const newRecipeData = response.data;
 
-      console.log(newRecipeData);
+      const newCalories = parseInt(newRecipeData.calories, 10);
+      const newCarbs = parseInt(newRecipeData.carbohydratebydifference, 10);
+      const newProtein = parseInt(newRecipeData.protein, 10);
+
+      // Update total values
+      setTotalCalories((prevTotal) => prevTotal + newCalories);
+      setTotalCarbs((prevTotal) => prevTotal + newCarbs);
+      setTotalProtein((prevTotal) => prevTotal + newProtein);
 
       setRecipeData((prevData) => [...prevData, newRecipeData]);
-
-      setLoading(false);
     } catch (err) {
       console.log(err);
     }
@@ -88,15 +108,30 @@ export default function FoodJournal() {
     for (let i = 0; i < recipeID.length; i++) {
       fetchData(recipeID[i]);
     }
+    setLoading(false);
   };
 
   const removeFromJournal = async (item) => {
     try {
+      // Update the local state first
+      setRecipeData((prevData) => prevData.filter((recipe) => recipe.recipe_id !== item.recipe_id));
+
+      // Update total values
+      const removedCalories = parseInt(item.calories, 10);
+      const removedCarbs = parseInt(item.carbohydratebydifference, 10);
+      const removedProtein = parseInt(item.protein, 10);
+
+      setTotalCalories((prevTotal) => prevTotal - removedCalories);
+      setTotalCarbs((prevTotal) => prevTotal - removedCarbs);
+      setTotalProtein((prevTotal) => prevTotal - removedProtein);
+
+      // Update Firestore
       const docRef = doc(FIREBASE_DB, "users", uid);
-
-
-      updateDoc(docRef, {
+      await updateDoc(docRef, {
         journal: arrayRemove(item.recipe_id),
+        total_calories: totalCalories - removedCalories,
+        total_carbs: totalCarbs - removedCarbs,
+        total_protein: totalProtein - removedProtein,
       });
 
       console.log("removed");
@@ -149,6 +184,7 @@ export default function FoodJournal() {
             </Text>
           </View>
         </TouchableOpacity>
+
         {loading ? (
           <ActivityIndicator size="large" color="#ecb469" />
         ) : (
@@ -176,7 +212,7 @@ export default function FoodJournal() {
                     backgroundColor: "white",
                     justifyContent: "space-between",
                     paddingVertical: 10,
-                    width: width*0.40
+                    width: width * 0.40,
                   }}
                 >
                   <Text>{item.recipe_title}</Text>
@@ -200,7 +236,23 @@ export default function FoodJournal() {
             )}
           />
         )}
+
+        {totalCalories < calories && totalProtein < proteinGrams && totalCarbs < carbGrams ? (
+          <Text style={{ marginTop: 20, fontSize: 18, color: "green", fontWeight: "bold" }}>
+            Your food is healthy!
+          </Text>
+        ) : totalCalories < calories || totalProtein < proteinGrams || totalCarbs < carbGrams ? (
+          <Text style={{ marginTop: 20, fontSize: 18, color: "orange", fontWeight: "bold" }}>
+            Your food is slightly unhealthy.
+          </Text>
+        ) : (
+          <Text style={{ marginTop: 20, fontSize: 18, color: "red", fontWeight: "bold" }}>
+            Your food is completely unhealthy.
+          </Text>
+        )}
       </View>
     </View>
   );
-}
+};
+
+export default FoodJournal;
