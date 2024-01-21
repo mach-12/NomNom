@@ -17,11 +17,9 @@ const Scanner = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      // Run this effect when the screen is focused
       setupCamera();
 
       return () => {
-        // Clean up resources, if necessary, when the screen is unfocused
       };
     }, [])
   );
@@ -29,8 +27,22 @@ const Scanner = () => {
   const handleButtonClick = async () => {
     if (cameraRef.current) {
       const photo = await cameraRef.current.takePictureAsync();
-      // Handle the captured photo as needed
       console.log(photo);
+
+      const base64Image = `data:image/jpg;base64,${photo.base64}`;
+
+      try {
+        const response = await axios.post(
+          "yahalinkdaalchutiye/menu_ocr_trigger",
+          {
+            img: base64Image,
+          }
+        );
+
+        console.log(response.data);
+      } catch (error) {
+        console.error("Error sending image to API:", error);
+      }
     }
   };
 
@@ -49,31 +61,16 @@ const Scanner = () => {
             flex: 1,
             backgroundColor: "transparent",
             flexDirection: "row",
-            justifyContent: "space-between", // Align items at the ends of the container
-            paddingHorizontal: 15, // Add padding for the flip button
-            paddingTop: 15, // Add padding for the flip button
+            justifyContent: "space-between",
+            paddingHorizontal: 15,
+            paddingTop: 15,
           }}
-        >
-          {/* <TouchableOpacity
-            style={{
-              alignSelf: "flex-start", // Align to the top left
-            }}
-            onPress={() => {
-              setType(
-                type === Camera.Constants.Type.back
-                  ? Camera.Constants.Type.front
-                  : Camera.Constants.Type.back
-              );
-            }}
-          >
-            <Text style={{ fontSize: 18, color: "white" }}>Flip</Text>
-          </TouchableOpacity> */}
-        </View>
+        />
       </Camera>
 
       <TouchableOpacity
         style={{
-          justifyContent: "center", // Center content vertically
+          justifyContent: "center",
           alignItems: "center",
           backgroundColor: "transparent",
           position: "absolute",
