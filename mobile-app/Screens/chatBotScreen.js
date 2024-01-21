@@ -1,53 +1,52 @@
-import {
-  Dimensions,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from "react-native";
+import { Dimensions, KeyboardAvoidingView, Platform } from "react-native";
 import React, { useState } from "react";
 import { GiftedChat } from "react-native-gifted-chat";
-import { Dialogflow_V2 } from "react-native-dialogflow";
-import { InputToolbar } from "react-native-gifted-chat";
 
 const { height, width } = Dimensions.get("window");
 
 export default function ChatBotScreen() {
   const [messages, setMessages] = useState([]);
 
-  const onSend = (newMessages = []) => {
+  const onSend = async (newMessages = []) => {
     setMessages((previousMessages) =>
       GiftedChat.append(previousMessages, newMessages)
     );
 
     const userMessage = newMessages[0].text;
 
-    Dialogflow_V2.requestQuery(
-      userMessage,
-      (result) => {
-        const chatbotResponse = result.queryResult.fulfillmentText;
+    try {
+      const response = await fetch("https://347a-2401-4900-5d9b-5a49-74a7-9b3e-16b8-bfb.ngrok-free.app/chat", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ question: userMessage }),
+      });
 
-        const botMessage = {
-          _id: Math.random().toString(36).substring(7),
-          text: chatbotResponse,
-          createdAt: new Date(),
-          user: {
-            _id: 2,
-            name: "Chatbot",
-          },
-        };
-
-        setMessages((previousMessages) =>
-          GiftedChat.append(previousMessages, [botMessage])
-        );
-      },
-      (error) => {
-        // Handle errors
-        console.error("Dialogflow error:", error);
+      if (!response.ok) {
+        throw new Error("Failed to fetch response");
       }
-    );
-  };
 
-  const giftedChatStyle = { marginBottom: height * 0.3, flex: 1 };
+      const result = await response.json();
+
+      const botMessage = {
+        _id: Math.random().toString(36).substring(7),
+        text: result.response,
+        createdAt: new Date(),
+        user: {
+          _id: 2,
+          name: "Chatbot",
+        },
+      };
+
+      setMessages((previousMessages) =>
+        GiftedChat.append(previousMessages, [botMessage])
+      );
+    } catch (error) {
+      console.error("API error:", error);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -64,22 +63,6 @@ export default function ChatBotScreen() {
         user={{
           _id: 1,
         }}
-        // Apply the style to lift the chat window
-        renderInputToolbar={(props) => (
-          <InputToolbar
-            {...props}
-            containerStyle={{
-              backgroundColor: "white",
-              borderRadius: 30
-            }}
-            primaryStyle={{
-              alignItems: "center",
-              borderRadius: 30,
-              // borderWidth: 1,
-              // borderColor: "black",
-            }}
-          />
-        )}
       />
     </KeyboardAvoidingView>
   );
