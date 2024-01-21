@@ -25,6 +25,14 @@ const replaceSpacesWithComma = (str) => {
   return str.replace(/\s+/g, ",");
 };
 
+const fetchDRI = async () => {
+  return {
+    fat_grams: 70,
+    protein_grams: 50,
+    carb_grams: 130,
+  };
+};
+
 const fetchData = async (url, authToken, setRecipes, setLoading) => {
   try {
     setLoading(true);
@@ -46,8 +54,19 @@ const SearchScreen = () => {
   const [query, setQuery] = useState("");
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [driResults, setDRIResults] = useState({});
   const authToken = useAuthStore((state) => state.authToken);
   const navigation = useNavigation();
+
+  useEffect(() => {
+    // Fetch DRI results when the component mounts
+    const fetchDRIResults = async () => {
+      const results = await fetchDRI();
+      setDRIResults(results);
+    };
+
+    fetchDRIResults();
+  }, []); // Empty dependency array ensures it runs only once
 
   const searchQuery = () => {
     const capitalQuery = capitalizeFirstLetterOfEachWord(query);
@@ -86,6 +105,15 @@ const SearchScreen = () => {
   };
 
   const RenderItem = ({ item }) => {
+    // Check if the recipe is healthy or unhealthy
+    const isHealthy =
+      item.carbohydratebydifference < driResults.carb_grams &&
+      item.fat < driResults.fat_grams &&
+      item.protein < driResults.protein_grams;
+
+    // Define a text color based on health status
+    const healthTextColor = isHealthy ? "green" : "red";
+
     return (
       <TouchableOpacity
         onPress={() => navigation.navigate("RecipeInfo", { recipeData: item })}
@@ -95,10 +123,10 @@ const SearchScreen = () => {
             marginLeft: 10,
             height: height * 0.08,
             width: width * 0.9,
-            // backgroundColor: "#f5f5f5",
             padding: 10,
             borderRadius: 15,
             marginBottom: 20,
+            backgroundColor: isHealthy ? "#aaffaa" : "#ffaaaa",
           }}
         >
           <View style={{ flexDirection: "row" }}>
@@ -129,6 +157,11 @@ const SearchScreen = () => {
               </View>
             </View>
           </View>
+
+          {/* Display health status */}
+          <Text style={{ color: healthTextColor, fontWeight: "bold" }}>
+            {isHealthy ? "Healthy" : "Unhealthy"}
+          </Text>
         </View>
       </TouchableOpacity>
     );
@@ -169,7 +202,6 @@ const SearchScreen = () => {
             <FlatList
               showsVerticalScrollIndicator={false}
               data={recipes}
-              // style={{elevation: 5}}
               keyExtractor={(item) => item?._id?.toString()}
               renderItem={({ item }) => <RenderItem item={item} />}
             />
