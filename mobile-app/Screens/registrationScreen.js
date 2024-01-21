@@ -48,35 +48,101 @@ export default function RegistrationScreen() {
   const [age,setAge]=useState('');
   const [tall, setTall]=useState('');
   const [weight, setWeight]=useState('');
+  const PROTEIN_PERCENTAGE = 0.2;
+  const FAT_PERCENTAGE = 0.3;
+  const CARB_PERCENTAGE = 0.5;
+
+  // Constants for activity multipliers
+  const ACTIVITY_MULTIPLIERS = {
+    'sedentary': 1.2,
+    'lightly active': 1.375,
+    'moderately active': 1.55,
+    'very active': 1.725,
+    'extra active': 1.9
+  };
+
+  function calculateDRI(inputData) {
+    // Extracting values from input data
+    const { weight, height, age, sex, activity_level } = inputData;
+  
+    // Validate weight, height, and age
+    if (weight < 0 || height < 0 || age < 0) {
+      throw new Error("Weight, height, and age must be non-negative values.");
+    }
+  
+    // BMR Mifflin-St Jeor Equation for Total Calories
+    let bmr;
+    if (sex === 'male') {
+      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+    } else if (sex === 'female') {
+      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+    } else {
+      throw new Error("Invalid sex. Please enter 'male' or 'female'.");
+    }
+  
+    // Adjust for activity level
+    if (!ACTIVITY_MULTIPLIERS.hasOwnProperty(activity_level)) {
+      throw new Error("Invalid activity level. Please choose from 'sedentary', 'lightly active', 'moderately active', 'very active', or 'extra active'.");
+    }
+  
+    const totalCalories = bmr * ACTIVITY_MULTIPLIERS[activity_level];
+  
+    // Calculate protein, fat, and carb intake based on percentages
+    const proteinCalories = totalCalories * PROTEIN_PERCENTAGE;
+    const fatCalories = totalCalories * FAT_PERCENTAGE;
+    const carbCalories = totalCalories * CARB_PERCENTAGE;
+  
+    const proteinGrams = proteinCalories / 4;
+    const fatGrams = fatCalories / 9;
+    const carbGrams = carbCalories / 4;
+  
+    return {
+      total_calories: totalCalories,
+      protein_calories: proteinCalories,
+      fat_calories: fatCalories,
+      carb_calories: carbCalories,
+      protein_grams: proteinGrams,
+      fat_grams: fatGrams,
+      carb_grams: carbGrams,
+    };
+  }
+  
 
   const signUp = async () => {
     setLoading(true);
     try {
-      const response = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      console.log(response);
+      const response = await createUserWithEmailAndPassword(auth, email, password);
       const user = response.user;
       const user_id = user.uid;
-
+  
       setUid(user_id);
-      setUpProfile(user_id);
-
+      
+      // DRI calculation
+      const driInput = {
+        weight: parseFloat(weight),
+        height: parseFloat(tall),
+        age: parseInt(age),
+        sex: gender,
+        activity_level: activity,
+      };
+      
+      const driResult = calculateDRI(driInput);
+  
+      // Set up user profile with DRI data
+      await setUpProfile(user_id, driResult);
+  
       alert("Account Created :)");
     } catch (err) {
       console.log(err);
-      alert("sign up failed with error: " + err);
+      alert("Sign up failed with error: " + err);
     } finally {
       setLoading(false);
     }
   };
-
-  function setUpProfile(user_id) {
-    // console.log(user_id);
-
+  
+  function setUpProfile(user_id, driResult) {
     try {
+      // Add DRI data to the user profile
       setDoc(doc(FIREBASE_DB, "users", user_id), {
         name: name,
         email: email,
@@ -84,13 +150,15 @@ export default function RegistrationScreen() {
         age: age,
         height: tall,
         weight: weight,
-        activityType: activity
+        activityType: activity,
+        ...driResult,
       });
     } catch (err) {
       console.log(err);
       alert(err);
     }
   }
+  
 
   const data = [
     { label: "Sedentary", value: "sedentary" },
