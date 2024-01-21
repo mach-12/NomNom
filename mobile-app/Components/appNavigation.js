@@ -2,6 +2,7 @@ import {
   Ionicons,
   MaterialCommunityIcons,
   AntDesign,
+  Entypo
 } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
@@ -24,6 +25,7 @@ import Onboarding from "./onboarding.js";
 import RecipeInfo from "./recipeInfo.js";
 import OcrScreen from "../Screens/ocrScreen.js";
 import Scanner from "./Scanner.js";
+import JournalScreen from "../Screens/journalScreen.js";
 // import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
@@ -111,8 +113,8 @@ export default function AppNavigation() {
         ></Tab.Screen>
 
         <Tab.Screen
-          name="Ocr"
-          component={OcrScreen}
+          name="journal"
+          component={JournalScreen}
           options={{
             tabBarIcon: ({ focused }) => (
               <View
@@ -128,7 +130,8 @@ export default function AppNavigation() {
                   zIndex: 20,
                 }}
               >
-                <AntDesign name="scan1" size={40} color="white" />
+                {/* <AntDesign name="scan1" size={40} color="white" /> */}
+                <Entypo name="plus" size={40} color="white" />
               </View>
             ),
           }}
@@ -180,8 +183,8 @@ export default function AppNavigation() {
           })}
         ></Tab.Screen>
         <Tab.Screen
-          name="Settings"
-          component={AccountScreen}
+          name="ocrScreen"
+          component={OcrScreen}
           options={{
             tabBarIcon: ({ focused }) => (
               <View
@@ -190,9 +193,11 @@ export default function AppNavigation() {
                 }}
               >
                 {focused ? (
-                  <Ionicons name="settings" size={20} color="#fb9c32" />
+                  // <Ionicons name="settings" size={20} color="#fb9c32" />
+                  <AntDesign name="scan1" size={20} color="#fb9c32" />
                 ) : (
-                  <Ionicons name="settings-outline" size={20} color="gray" />
+                  // <Ionicons name="settings-outline" size={20} color="gray" />
+                  <AntDesign name="scan1" size={20} color="gray" />
                 )}
               </View>
             ),
@@ -289,6 +294,16 @@ export default function AppNavigation() {
             animation: "slide_from_right",
           }}
         />
+                <InsideStack.Screen
+          name="AccountScreen"
+          component={AccountScreen}
+          options={{
+            title: "Inventory Search Screen",
+            headerShown: false,
+            animation: "slide_from_right",
+          }}
+        />
+
       </InsideStack.Navigator>
     );
   }
